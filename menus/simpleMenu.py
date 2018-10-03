@@ -7,13 +7,15 @@ import requests
 # todo täältä haetaan vain kannasta menu
 # todo tee tää ehkä oikein, niinku todoissa tehdään
 
-#static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&MenuTypeId=78&Week=40&Weekday=1&lang=%27fi%27&format=json"
+# http://www.django-rest-framework.org/tutorial/1-serialization/
+
+
 static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
 juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
 
 
 def respondwithmenu(request, restaurant_name):
-    
+
     # todo switch restaurant_name
 
     menu = getFoobarMenu()
@@ -23,6 +25,8 @@ def respondwithmenu(request, restaurant_name):
 
 
 def getFoobarMenu():
+
+    # https://www.juvenes.fi/foobar
 
     foobar_restaurant_id = 490051
     # todo kato jos nää id:t on samat muissa ravinteleissa
