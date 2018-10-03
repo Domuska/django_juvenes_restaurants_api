@@ -16,3 +16,5 @@ services:
     environment:
       POSTGRES_USER: todoapp
       POSTGRES_DB: todos
+    ports:
+      - "5432:5432"
