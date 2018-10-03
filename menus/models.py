@@ -8,8 +8,8 @@ class Menu(models.Model):
     restaurant_id = models.IntegerField(blank=False)
     menu_items_fi = models.TextField()
     menu_items_en = models.TextField()
-    menu_date = models.DateTimeField()
+    menu_date = models.DateField(null=True)
 
     class Meta:
-        # ordering = ('created')
+        # ordering = ('created',)
         app_label = "menus"

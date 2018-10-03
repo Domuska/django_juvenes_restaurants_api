@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from urllib.request import urlopen
+from menus.serializers import MenuSerializer
+from menus.models import Menu
 import json
 import requests
 
@@ -18,10 +20,22 @@ def respondwithmenu(request, restaurant_name):
 
     # todo switch restaurant_name
 
-    menu = getFoobarMenu()
+    # menu = getFoobarMenu()
 
-    response = HttpResponse(json.dumps(menu), content_type="application/json")
-    return response
+    # test to save stuff to db too
+    #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi", menu_date="2018-10-03 07:27:28.031091+00")
+
+    try:
+        dbmenu = Menu.objects.get(restaurant_id=490051)
+    except Menu.DoesNotExist:
+        dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi")
+        dbmenu.save()
+
+    print("got menu:")
+    print(dbmenu)
+    # response = HttpResponse(json.dumps(menu), content_type="application/json")
+    response = dbmenu.menu_items_fi
+    return HttpResponse(response)
 
 
 def getFoobarMenu():
