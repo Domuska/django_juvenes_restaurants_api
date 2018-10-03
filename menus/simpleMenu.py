@@ -4,6 +4,7 @@ from menus.serializers import MenuSerializer
 from menus.models import Menu
 import json
 import requests
+import datetime
 
 # todo ruokalistojen haku omaan tiedostoonsa, tallenna kantaan
 # todo täältä haetaan vain kannasta menu
@@ -25,17 +26,34 @@ def respondwithmenu(request, restaurant_name):
     # test to save stuff to db too
     #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi", menu_date="2018-10-03 07:27:28.031091+00")
 
+    date_now = datetime.datetime.today().date()
+
     try:
-        dbmenu = Menu.objects.get(restaurant_id=490051)
+        dbmenu = Menu.objects.get(restaurant_id=490051, menu_date=date_now)
     except Menu.DoesNotExist:
-        dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi")
-        dbmenu.save()
+        menu = getFoobarMenu()
+
+        menu_items_en = []
+        menu_items_fi = []
+
+        for dishoption in menu:
+            print(dishoption)
+            menu_items_en.append(dishoption["name_en"])
+            menu_items_fi.append(dishoption["name_fi"])
+
+        print("menu items en")
+        print(menu_items_en)
+
+        dbmenu = Menu(restaurant_id=490051, menu_items_en=menu_items_en, menu_items_fi=menu_items_fi)
+        #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi")
+        #dbmenu.save()
 
     print("got menu:")
     print(dbmenu)
     # response = HttpResponse(json.dumps(menu), content_type="application/json")
+    # response = HttpResponse(json.dumps(menu), content_type="application/json")
     response = dbmenu.menu_items_fi
-    return HttpResponse(response)
+    return HttpResponse("this should not come back from here any more")
 
 
 def getFoobarMenu():
