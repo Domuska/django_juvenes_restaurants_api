@@ -12,28 +12,32 @@ import datetime
 
 # http://www.django-rest-framework.org/tutorial/1-serialization/
 
-
-static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
+# static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
 juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
 
-restaurants_dict = {
-    "foobar": 490051
+
+restaurants_dict2 = {
+    "foobar": {
+        "restaurant_id": 490051,
+        "menu_ids": [60, 78, 3, 23, 84]
+    },
+    "mara": {
+        "restaurant_id": 49,
+        "menu_ids": [60, 93, 23, 84]
+    }
 }
 
 
-def cache_menu(restaurant_id, date):
+def cache_menu(restaurant, date):
 
     # todo use restaurant id to fetch menu
     # todo date to get restaurant menu
-    menu = getFoobarMenu()
-
-    #menu_items_en = []
-    #menu_items_fi = []
+    menu = get_restaurant_menu(restaurant)
 
     for dishoption in menu:
         print(dishoption)
         dish = Menu(
-            restaurant_id=restaurant_id,
+            restaurant_id=restaurant["restaurant_id"],
             menu_item_en=dishoption["name_en"],
             menu_item_fi=dishoption["name_fi"],
             menu_date=date
@@ -67,7 +71,7 @@ def respondwithmenu(request, restaurant_name):
         dbmenu = Menu.objects.get(restaurant_id=490051, menu_date=date_now)
     except Menu.DoesNotExist:
 
-        menu = getFoobarMenu()
+        menu = get_restaurant_menu()
 
         menu_items_en = []
         menu_items_fi = []
@@ -91,27 +95,27 @@ def respondwithmenu(request, restaurant_name):
     return HttpResponse("this should not come back from here any more")
 
 
-def getFoobarMenu():
+def get_restaurant_menu(restaurant):
 
     # https://www.juvenes.fi/foobar
 
-    foobar_restaurant_id = 490051
+    restaurant_id = restaurant["restaurant_id"]
     # todo kato jos nää id:t on samat muissa ravinteleissa
-    foobar_menu_ids = [60, 78, 3, 23, 84]
+    restaurant_menu_ids = restaurant["menu_ids"]
 
     # foobar 490051
     # menuid 60, 78, 3, 23 84
 
     # construct urls
     url = juvenes_url_base
-    url = add_kitchen_id_to_url(url, foobar_restaurant_id)
+    url = add_kitchen_id_to_url(url, restaurant_id)
     # print(url)
     url = add_date_to_url(url, "40", "1")
     # print(url)
 
     # Get every single menu
     options = []
-    for menu_id in foobar_menu_ids:
+    for menu_id in restaurant_menu_ids:
         menu_url = add_menu_type_id_to_url(url, menu_id)
         options.extend(get_menu_with_url(menu_url))
 

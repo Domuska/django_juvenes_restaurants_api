@@ -6,7 +6,8 @@ from rest_framework import generics
 from menus.serializers import MenuSerializer
 from menus.models import Menu
 import datetime
-from menus.simpleMenu import cache_menu, restaurants_dict
+from menus.simpleMenu import cache_menu, restaurants_dict2
+import traceback
 
 
 @csrf_exempt
@@ -14,13 +15,15 @@ def menu_detail(request, restaurant_name):
 
     date_now = datetime.datetime.today().date()
     try:
-        restaurant_id = restaurants_dict[restaurant_name]
-        menus = get_menus_for(restaurant_id, date_now)
+        restaurant = restaurants_dict2[restaurant_name]
+        print(restaurant)
+        menus = get_menus_for(restaurant, date_now)
 
         serializer = MenuSerializer(menus, many=True)
         return JsonResponse(serializer.data, safe=False)
 
     except KeyError:
+        traceback.print_exc()
         return HttpResponse(status=404)
 
     # old stuff for fetching only a single menu item from db
@@ -32,12 +35,12 @@ def menu_detail(request, restaurant_name):
     #    menus = Menu.objects.filter(restaurant_id=490051, menu_date=date_now)
 
 
-def get_menus_for(restaurant_id, date):
+def get_menus_for(restaurant, date):
 
-    menus = Menu.objects.filter(restaurant_id=restaurant_id, menu_date=date)
+    menus = Menu.objects.filter(restaurant_id=restaurant["restaurant_id"], menu_date=date)
     # we don't have menus for the date yet for this restaurant, cache them them
     if len(menus) < 1:
-        cache_menu(restaurant_id, date)
+        cache_menu(restaurant, date)
         menus = Menu.objects.filter(restaurant_id=490051, menu_date=date)
 
     return menus
