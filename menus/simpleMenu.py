@@ -16,10 +16,14 @@ import datetime
 static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
 juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
 
+restaurants_dict = {
+    "foobar": 490051
+}
 
-def cache_menu(restaurant_name, date):
 
-    # todo switch restaurant_name
+def cache_menu(restaurant_id, date):
+
+    # todo use restaurant id to fetch menu
     # todo date to get restaurant menu
     menu = getFoobarMenu()
 
@@ -29,7 +33,7 @@ def cache_menu(restaurant_name, date):
     for dishoption in menu:
         print(dishoption)
         dish = Menu(
-            restaurant_id=490051,
+            restaurant_id=restaurant_id,
             menu_item_en=dishoption["name_en"],
             menu_item_fi=dishoption["name_fi"],
             menu_date=date
@@ -49,6 +53,9 @@ def cache_menu(restaurant_name, date):
     #)
     #dbmenu.save()
     #return dbmenu
+
+
+
 
 
 def respondwithmenu(request, restaurant_name):
