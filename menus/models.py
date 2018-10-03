@@ -6,9 +6,10 @@ from django.db import models
 class Menu(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     restaurant_id = models.IntegerField(blank=False)
-    menu_items_fi = models.TextField()
-    menu_items_en = models.TextField()
-    menu_date = models.DateField(null=True)
+    menu_item_fi = models.TextField()
+    menu_item_en = models.TextField()
+    # menu_date = models.DateField(null=True)
+    menu_date = models.DateField()
 
     class Meta:
         # ordering = ('created',)

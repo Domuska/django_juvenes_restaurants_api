@@ -17,20 +17,49 @@ static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServic
 juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
 
 
-def respondwithmenu(request, restaurant_name):
+def cache_menu(restaurant_name, date):
 
     # todo switch restaurant_name
+    # todo date to get restaurant menu
+    menu = getFoobarMenu()
 
-    # menu = getFoobarMenu()
+    #menu_items_en = []
+    #menu_items_fi = []
 
-    # test to save stuff to db too
-    #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi", menu_date="2018-10-03 07:27:28.031091+00")
+    for dishoption in menu:
+        print(dishoption)
+        dish = Menu(
+            restaurant_id=490051,
+            menu_item_en=dishoption["name_en"],
+            menu_item_fi=dishoption["name_fi"],
+            menu_date=date
+        )
+        dish.save()
+        #menu_items_en.append(dishoption["name_en"])
+        #menu_items_fi.append(dishoption["name_fi"])
+
+    #print("menu items en")
+    #print(menu_items_en)
+
+    #dbmenu = Menu(
+    #    restaurant_id=490051,
+    #    menu_item_en=menu_items_en,
+    #    menu_item_fi=menu_items_fi,
+    #    menu_date=date
+    #)
+    #dbmenu.save()
+    #return dbmenu
+
+
+def respondwithmenu(request, restaurant_name):
+
 
     date_now = datetime.datetime.today().date()
 
     try:
         dbmenu = Menu.objects.get(restaurant_id=490051, menu_date=date_now)
     except Menu.DoesNotExist:
+
         menu = getFoobarMenu()
 
         menu_items_en = []
@@ -50,7 +79,6 @@ def respondwithmenu(request, restaurant_name):
 
     print("got menu:")
     print(dbmenu)
-    # response = HttpResponse(json.dumps(menu), content_type="application/json")
     # response = HttpResponse(json.dumps(menu), content_type="application/json")
     response = dbmenu.menu_items_fi
     return HttpResponse("this should not come back from here any more")

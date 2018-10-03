@@ -6,8 +6,8 @@ class MenuSerializer(serializers.Serializer):
 
     created = serializers.DateTimeField()
     restaurant_id = serializers.IntegerField(required=True)
-    menu_items_fi = serializers.CharField()
-    menu_items_en = serializers.CharField()
+    menu_item_fi = serializers.CharField()
+    menu_item_en = serializers.CharField()
     menu_date = serializers.DateField()
 
     def create(self, validated_data):
@@ -20,8 +20,8 @@ class MenuSerializer(serializers.Serializer):
         print(dir(instance))
         print(type(validated_data))
         print(dir(validated_data))
-        instance.menu_items_fi = validated_data.get('menu_items_fi', instance.menu_items_fi)
-        instance.menu_items_en = validated_data.get('menu_items_en', instance.menu_items_en)
+        instance.menu_item_fi = validated_data.get('menu_item_fi', instance.menu_item_fi)
+        instance.menu_item_en = validated_data.get('menu_item_en', instance.menu_item_en)
         instance.menu_date = validated_data.get('menu_date', instance.menu_date)
 
         instance.save()

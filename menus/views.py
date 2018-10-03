@@ -6,7 +6,9 @@ from rest_framework import generics
 from menus.serializers import MenuSerializer
 from menus.models import Menu
 import datetime
-from menus.simpleMenu import getFoobarMenu
+from menus.simpleMenu import cache_menu
+
+# no idea what the csrf thing does. check it out.
 
 
 @csrf_exempt
@@ -16,39 +18,24 @@ def menu_detail(request, restaurant_name):
 
     # menu = getFoobarMenu()
 
-    # test to save stuff to db too
-    #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi", menu_date="2018-10-03 07:27:28.031091+00")
-
     date_now = datetime.datetime.today().date()
+    menus = Menu.objects.filter(restaurant_id=490051, menu_date=date_now)
 
-    try:
-        dbmenu = Menu.objects.get(restaurant_id=490051, menu_date=date_now)
-    except Menu.DoesNotExist:
-        menu = getFoobarMenu()
+    # we don't have menus for the date yet for this restaurant, fetch them
+    if len(menus) < 1:
+        cache_menu(restaurant_name, date_now)
+        menus = Menu.objects.filter(restaurant_id=490051, menu_date=date_now)
 
-        menu_items_en = []
-        menu_items_fi = []
+    # old stuff for fetching only a single menu item from db
+    # try:
+        # dbmenu = Menu.objects.get(restaurant_id=490051, menu_date=date_now)
+    #    menus = Menu.objects.filter(restaurant_id=490051, menu_date=date_now)
+    # except Menu.DoesNotExist:
+    #    cache_menu(restaurant_name, date_now)
+    #    menus = Menu.objects.filter(restaurant_id=490051, menu_date=date_now)
 
-        for dishoption in menu:
-            print(dishoption)
-            menu_items_en.append(dishoption["name_en"])
-            menu_items_fi.append(dishoption["name_fi"])
-
-        print("menu items en")
-        print(menu_items_en)
-
-        dbmenu = Menu(restaurant_id=490051, menu_items_en=menu_items_en, menu_items_fi=menu_items_fi)
-        #dbmenu = Menu(restaurant_id=490051, menu_items_en="potatismus", menu_items_fi="pottumuusi")
-        #dbmenu.save()
-
-    print("got menu:")
-    print(dbmenu)
-    # response = HttpResponse(json.dumps(menu), content_type="application/json")
-    # response = HttpResponse(json.dumps(menu), content_type="application/json")
-    #response = dbmenu.menu_items_fi
-    #return HttpResponse(response)
-    serializer = MenuSerializer(dbmenu)
-    return JsonResponse(serializer.data)
+    serializer = MenuSerializer(menus, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 
 #class Menu(generics.ListCreateAPIView):
