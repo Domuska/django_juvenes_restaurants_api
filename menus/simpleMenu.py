@@ -15,7 +15,7 @@ import datetime
 # static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
 juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
 
-
+# https://www.juvenes.fi/foobar
 restaurants_dict2 = {
     "foobar": {
         "restaurant_id": 490051,
@@ -24,6 +24,18 @@ restaurants_dict2 = {
     "mara": {
         "restaurant_id": 49,
         "menu_ids": [60, 93, 23, 84]
+    },
+    "väistö": {
+        "restaurant_id": 480066,
+        "menu_ids": [95, 84]
+    },
+    "kylymä": {
+        "restaurant_id": 490052,
+        "menu_ids": [60, 23, 84]
+    },
+    "napa": {
+        "restaurant_id": 480054,
+        "menu_ids": [60, 93, 77, 86, 84]
     }
 }
 
@@ -32,7 +44,7 @@ def cache_menu(restaurant, date):
 
     # todo use restaurant id to fetch menu
     # todo date to get restaurant menu
-    menu = get_restaurant_menu(restaurant)
+    menu = get_restaurant_menu(restaurant, date)
 
     for dishoption in menu:
         print(dishoption)
@@ -95,22 +107,26 @@ def respondwithmenu(request, restaurant_name):
     return HttpResponse("this should not come back from here any more")
 
 
-def get_restaurant_menu(restaurant):
+def get_restaurant_menu(restaurant, date):
+    """Get all menus for a restaurant for a particular day
 
-    # https://www.juvenes.fi/foobar
+    Args:
+        restaurant (dictionary): See restaurants_dict2
+        date (date): a date object for the day of menus
+    Returns:
+        array of dictionary items
+    """
 
     restaurant_id = restaurant["restaurant_id"]
-    # todo kato jos nää id:t on samat muissa ravinteleissa
     restaurant_menu_ids = restaurant["menu_ids"]
 
-    # foobar 490051
-    # menuid 60, 78, 3, 23 84
+    date_tuple = date.isocalendar()
 
     # construct urls
     url = juvenes_url_base
     url = add_kitchen_id_to_url(url, restaurant_id)
-    # print(url)
-    url = add_date_to_url(url, "40", "1")
+
+    url = add_date_to_url(url, date_tuple[1], date_tuple[2])
     # print(url)
 
     # Get every single menu
@@ -124,6 +140,14 @@ def get_restaurant_menu(restaurant):
 
 
 def get_menu_with_url(url):
+    """Get a single Juvenes menu with the URL provided
+
+    Params:
+        param url: the URL to use to fetch menu data
+    Returns:
+        Dictionary with elements name_en, name_fi for dishes
+    """
+
     response = requests.get(url)
     # for some reason Juvenes has all data in the 'd' field
     data_field = json.loads(response.text)
@@ -133,9 +157,6 @@ def get_menu_with_url(url):
     # print(meals_arr)
 
     mealoptions = []
-    mealoptionsdict = {
-        "options": []
-    }
 
     for mealdata in meals_arr:
 
@@ -149,19 +170,6 @@ def get_menu_with_url(url):
                 "name_en": dishitem["Name_EN"],
                 "name_fi": dishitem["Name_FI"]
             })
-
-            # mealoptionsdict["options"].append({
-            #    "name_en": dishitem["Name_EN"],
-            #    "name_fi": dishitem["Name_FI"]
-            # })
-
-        # dish = item[0]["Name"]
-        # print(dish)
-        # mealoptions.append(dish)
-
-    # todo continue from here
-    # todo could start to think of writing stuff to DB
-    # todo or maybe do route stuff properly
 
     print(mealoptions)
 

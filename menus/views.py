@@ -13,7 +13,7 @@ import traceback
 @csrf_exempt
 def menu_detail(request, restaurant_name):
 
-    date_now = datetime.datetime.today().date()
+    date_now = datetime.date.today()
     try:
         restaurant = restaurants_dict2[restaurant_name]
         print(restaurant)
@@ -41,7 +41,7 @@ def get_menus_for(restaurant, date):
     # we don't have menus for the date yet for this restaurant, cache them them
     if len(menus) < 1:
         cache_menu(restaurant, date)
-        menus = Menu.objects.filter(restaurant_id=490051, menu_date=date)
+        menus = Menu.objects.filter(restaurant_id=restaurant["restaurant_id"], menu_date=date)
 
     return menus
 
