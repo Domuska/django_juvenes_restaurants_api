@@ -6,16 +6,12 @@ import json
 import requests
 import datetime
 
-# todo ruokalistojen haku omaan tiedostoonsa, tallenna kantaan
-# todo täältä haetaan vain kannasta menu
-# todo tee tää ehkä oikein, niinku todoissa tehdään
-
 # http://www.django-rest-framework.org/tutorial/1-serialization/
 
-# static_url = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?KitchenId=490051&Week=40&Weekday=1&lang=%27en%27&format=json&MenuTypeId=78&"
-juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByWeekday?lang=%27en%27&format=json&"
-
 # https://www.juvenes.fi/foobar
+juvenes_url_base = "http://juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/" \
+                   "GetMenuByWeekday?lang=%27en%27&format=json&"
+
 restaurants_dict2 = {
     "foobar": {
         "restaurant_id": 490051,
@@ -41,37 +37,21 @@ restaurants_dict2 = {
 
 
 def cache_menu(restaurant, date):
+    # call networking functions to fetch restaurant data
+    # save that to db
 
-    # todo use restaurant id to fetch menu
-    # todo date to get restaurant menu
     menu = get_restaurant_menu(restaurant, date)
 
     for dishoption in menu:
-        print(dishoption)
+        # print(dishoption)
         dish = Menu(
             restaurant_id=restaurant["restaurant_id"],
-            menu_item_en=dishoption["name_en"],
-            menu_item_fi=dishoption["name_fi"],
-            menu_date=date
+            menu_item_en=dishoption["meal_name_en"],
+            menu_item_fi=dishoption["meal_name_fi"],
+            menu_date=date,
+            menu_name=dishoption["menu_name"]
         )
         dish.save()
-        #menu_items_en.append(dishoption["name_en"])
-        #menu_items_fi.append(dishoption["name_fi"])
-
-    #print("menu items en")
-    #print(menu_items_en)
-
-    #dbmenu = Menu(
-    #    restaurant_id=490051,
-    #    menu_item_en=menu_items_en,
-    #    menu_item_fi=menu_items_fi,
-    #    menu_date=date
-    #)
-    #dbmenu.save()
-    #return dbmenu
-
-
-
 
 
 def respondwithmenu(request, restaurant_name):
@@ -140,7 +120,7 @@ def get_restaurant_menu(restaurant, date):
 
 
 def get_menu_with_url(url):
-    """Get a single Juvenes menu with the URL provided
+    """Get a single Juvenes menu with the URL provided over the network
 
     Params:
         param url: the URL to use to fetch menu data
@@ -154,30 +134,37 @@ def get_menu_with_url(url):
     data_field = json.loads(data_field["d"])
 
     meals_arr = data_field["MealOptions"]
-    # print(meals_arr)
+    print(meals_arr)
 
     mealoptions = []
 
     for mealdata in meals_arr:
 
-        # the restaurants have many different menu items with ids
         # first item of array of options seems to have the actual food,
         # second item might have sauce or somesuch
 
-        for dishitem in mealdata["MenuItems"]:
+        meal_option_dict = {
+            "meal_name_en": "",
+            "meal_name_fi": "",
+            "menu_name": mealdata["Name"]
+        }
 
-            mealoptions.append({
-                "name_en": dishitem["Name_EN"],
-                "name_fi": dishitem["Name_FI"]
-            })
+        for enumer_value, dish_item in enumerate(mealdata["MenuItems"]):
+            if enumer_value:
+                meal_option_dict["meal_name_en"] += ", "
+                meal_option_dict["meal_name_fi"] += ", "
 
-    print(mealoptions)
+            meal_option_dict["meal_name_en"] += dish_item["Name_EN"]
+            meal_option_dict["meal_name_fi"] += dish_item["Name_FI"]
+
+        mealoptions.append(meal_option_dict)
+
+    # print(mealoptions)
 
     return mealoptions
 
 
 def add_kitchen_id_to_url(url, kitchen_id):
-    #KitchenId=490051&
     return url + "KitchenId=%s&" % kitchen_id
 
 
@@ -190,6 +177,3 @@ def add_date_to_url(url, weeknumber, weekdaynumber):
     url = url + "Week=%s&" % weeknumber
     return url
 
-
-# def add_lang_to_url(url, langcode):
-#    return url + "lang=%27fi%27"

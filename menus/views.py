@@ -16,7 +16,7 @@ def menu_detail(request, restaurant_name):
     date_now = datetime.date.today()
     try:
         restaurant = restaurants_dict2[restaurant_name]
-        print(restaurant)
+        # print(restaurant)
         menus = get_menus_for(restaurant, date_now)
 
         serializer = MenuSerializer(menus, many=True)
